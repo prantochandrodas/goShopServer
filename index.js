@@ -69,7 +69,13 @@ async function run() {
       const result = await allProductsCollection.insertOne(product);
       res.send(result);
     });
-
+    //myproduct 
+    app.get('/myProduct', async (req, res) => {
+      const useremail = req.query.email;
+      const query = { email: useremail }
+      const result = await allProductsCollection.find(query).toArray();
+      res.send(result);
+    });
     // add user
     app.post('/users', async (req, res) => {
       const users = req.body;
@@ -93,6 +99,52 @@ async function run() {
       res.send(result);
     });
 
+    //product delete 
+    app.delete('/myProduct/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await allProductsCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    //get user 
+    app.get('/getUser', async (req, res) => {
+      const useremail = req.query.email;
+      
+      const query = { email: useremail}
+      const result = await userCollection.findOne(query);
+      res.send(result);
+    });
+// manage USER
+    app.get('/ManageUsers', async (req, res) => {
+      const query = { role:"buyer"}
+      const result = await userCollection.find(query).toArray();
+      res.send(result);
+    });
+
+// user delete 
+
+app.delete('/user/:id', async (req, res) => {
+  const id = req.params.id;
+  const query = { _id: ObjectId(id) };
+  const result = await userCollection.deleteOne(query);
+  res.send(result);
+});
+// manage seller
+app.get('/ManageSellers', async (req, res) => {
+  const query = { role:"seller"}
+  const result = await userCollection.find(query).toArray();
+  res.send(result);
+});
+
+// user delete 
+
+app.delete('/seller/:id', async (req, res) => {
+const id = req.params.id;
+const query = { _id: ObjectId(id) };
+const result = await userCollection.deleteOne(query);
+res.send(result);
+});
 
   } finally {
 
