@@ -19,6 +19,7 @@ async function run() {
     const categoryCollection = client.db('goShopDb').collection('categoryCollection');
     const allProductsCollection = client.db('goShopDb').collection('allProductsCollection');
     const watchLaterCollection = client.db('goShopDb').collection('watchLaterCollection');
+    const placeOrderCollection = client.db('goShopDb').collection('placeOrderCollection');
     const userCollection = client.db('goShopDb').collection('userCollection');
     //category
     app.get('/category', async (req, res) => {
@@ -28,17 +29,57 @@ async function run() {
     });
     app.get('/flashsale', async (req, res) => {
       const query = {};
-      const result = await allProductsCollection.find(query).toArray();
+      const result = await allProductsCollection.find(query).sort({'posted_date':-1}).limit(8).toArray();
       res.send(result);
     });
     //add watch later collection
     app.post('/watchLater', async (req, res) => {
       const watchLater = req.body;
-      console.log(watchLater);
-      const result = await watchLaterCollection.insertOne(watchLater);
-      res.send(result);
+      const id=req.body.product_id;
+      const query={product_id:id}
+      const findWatchLater=await watchLaterCollection.findOne(query);
+      if(findWatchLater){
+        res.send(false);
+        console.log('already added');
+      }else{
+        const result = await watchLaterCollection.insertOne(watchLater);
+        res.send(result);
+  
+      }
+    });
+     //add watch later collection
+     app.post('/placeOrder', async (req, res) => {
+      const placeOrder = req.body;
+      const id=req.body.product_id;
+      const query={product_id:id}
+      const findOrder=await placeOrderCollection.findOne(query);
+      if(findOrder){
+        res.send(false);
+      }else{
+        const result = await placeOrderCollection.insertOne(placeOrder);
+        res.send(result);
+      }
+      
 
     });
+
+      //myOrder 
+      app.get('/myOrder', async (req, res) => {
+        const useremail = req.query.email;
+        const query = { email: useremail }
+        const result = await placeOrderCollection.find(query).toArray();
+        res.send(result);
+      });
+
+      //myOrder delete 
+      app.delete('/myOrder/:id', async (req, res) => {
+        const id = req.params.id;
+        const query = { _id: ObjectId(id) };
+        const result = await placeOrderCollection.deleteOne(query);
+        res.send(result);
+      });
+    
+    
     app.get('/products/:id', async (req, res) => {
       const id = req.params.id;
       console.log(id);
@@ -62,6 +103,8 @@ async function run() {
       const result = await watchLaterCollection.find(query).toArray();
       res.send(result);
     });
+
+     
     //add product
     app.post('/addProduct', async (req, res) => {
       console.log(req.body);
@@ -76,6 +119,8 @@ async function run() {
       const result = await allProductsCollection.find(query).toArray();
       res.send(result);
     });
+    
+
     // add user
     app.post('/users', async (req, res) => {
       const users = req.body;
@@ -110,9 +155,9 @@ async function run() {
     //get user 
     app.get('/getUser', async (req, res) => {
       const useremail = req.query.email;
-      
       const query = { email: useremail}
       const result = await userCollection.findOne(query);
+      console.log(result);
       res.send(result);
     });
 // manage USER
