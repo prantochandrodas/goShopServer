@@ -32,26 +32,35 @@ async function run() {
       const result = await allProductsCollection.find(query).sort({'posted_date':-1}).limit(8).toArray();
       res.send(result);
     });
+
+    //all product 
+    app.get('/allProducts', async (req, res) => {
+      const query = {};
+      const result = await allProductsCollection.find(query).toArray();
+      res.send(result);
+    });
     //add watch later collection
     app.post('/watchLater', async (req, res) => {
       const watchLater = req.body;
       const id=req.body.product_id;
-      const query={product_id:id}
+      const newEmail=req.body.email;
+      const query={product_id:id,email:newEmail}
       const findWatchLater=await watchLaterCollection.findOne(query);
       if(findWatchLater){
         res.send(false);
-        console.log('already added');
       }else{
         const result = await watchLaterCollection.insertOne(watchLater);
         res.send(result);
   
       }
     });
+
      //add watch later collection
      app.post('/placeOrder', async (req, res) => {
       const placeOrder = req.body;
       const id=req.body.product_id;
-      const query={product_id:id}
+      const newEmail=req.body.email;
+      const query={product_id:id,email:newEmail}
       const findOrder=await placeOrderCollection.findOne(query);
       if(findOrder){
         res.send(false);
@@ -82,8 +91,6 @@ async function run() {
     
     app.get('/products/:id', async (req, res) => {
       const id = req.params.id;
-      console.log(id);
-      // console.log(id);
       const query = { category_id: id }
       const result = await allProductsCollection.find(query).toArray();
       res.send(result);
@@ -91,7 +98,6 @@ async function run() {
 
     app.get('/buyProduct/:id', async (req, res) => {
       const id = req.params.id;
-      console.log(id);
       const query = { _id: ObjectId(id) };
       const result = await allProductsCollection.findOne(query);
       res.send(result);
@@ -107,7 +113,6 @@ async function run() {
      
     //add product
     app.post('/addProduct', async (req, res) => {
-      console.log(req.body);
       const product = req.body;
       const result = await allProductsCollection.insertOne(product);
       res.send(result);
@@ -131,7 +136,6 @@ async function run() {
     app.put('/googleUser', async (req, res) => {
       const email = req.query.email;
       const name = req.query.name;
-      console.log(name)
       const filter = { email: (email) };
       const option = { upsert: true }
       const updatedDoc = {
@@ -157,7 +161,6 @@ async function run() {
       const useremail = req.query.email;
       const query = { email: useremail}
       const result = await userCollection.findOne(query);
-      console.log(result);
       res.send(result);
     });
 // manage USER
